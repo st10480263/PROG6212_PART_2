@@ -2,44 +2,40 @@ name: RaceDay API CI/CD Pipeline
 
 on:
   push:
-    branches: [ "main", "master" ]
+    branches: [ "**" ]
   pull_request:
-    branches: [ "main", "master" ]
+    branches: [ "**" ]
 
 jobs:
   build-and-test:
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./POE_Part_2/POE_Part2
 
     steps:
-    # 1. Pull down repository source code
     - name: Checkout Repository
       uses: actions/checkout@v4
 
-    # 2. Setup .NET SDK
     - name: Setup .NET SDK
       uses: actions/setup-dotnet@v4
       with:
         dotnet-version: '8.0.x'
 
-    # 3. Restore all project and test dependencies
     - name: Restore Dependencies
       run: dotnet restore
 
-    # 4. Build solution in Release mode without re-restoring
     - name: Build Solution
-      run: dotnet build --no-restore --configuration Release
+      run: dotnet build --configuration Release
 
-    # 5. Run all xUnit tests
     - name: Run Unit Tests
-      run: dotnet test --no-build --configuration Release --verbosity normal --logger "trx;LogFileName=test_results.trx"
+      run: dotnet test --configuration Release --verbosity normal
 
-    # 6. Publish the production-ready Web API binary artifacts
     - name: Publish API
-      run: dotnet publish --no-build --configuration Release --output ./publish
+      run: dotnet publish -c Release -o ./publish
 
-    # 7. Upload the compiled build as an artifact on GitHub
     - name: Upload Build Artifacts
       uses: actions/upload-artifact@v4
       with:
         name: api-release-build
-        path: ./publish
+        path: POE_Part_2/POE_Part2/publish
